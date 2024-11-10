@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Face Recognition using OpenCV
  - Create dataset of face images
  - - Detect faces using ```deploy.prototxt``` and ```res10_300x300_ssd_iter_140000.caffemodel```. (Learn more about [face detection](https://github.com/aakashjhawar/face-detection))
@@ -42,3 +43,6 @@ sudo apt-get install python-opencv
 ![Result](https://github.com/aakashjhawar/face-recognition-using-opencv/blob/master/images/output1.png)
 
 
+=======
+# face-recognition-modified
+>>>>>>> 7be33b254bdfaf60afabab1bd44c7c4296a48670
