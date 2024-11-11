@@ -1,10 +1,4 @@
-# USAGE
-# python recognize.py --image path/to/image.jpg
-# python recognize_image.py --image dataset\\aakash\\00000.png 
-# dataset\modi\00000.png
-# import libraries
 import numpy as np
-import argparse
 import imutils
 import pickle
 import cv2
@@ -84,14 +78,12 @@ def recognize_faces(image, faces, embedder, recognizer, le):
     return image
 
 def main():
-    # Construct the argument parser and parse the arguments
-    ap = argparse.ArgumentParser()
-    ap.add_argument("-i", "--image", required=True, help="input image path")
-    args = vars(ap.parse_args())
-
-    # Validate input image path
-    if not os.path.exists(args["image"]):
-        print("[ERROR] Input image path does not exist.")
+    # Set a default image path or allow user input for flexibility
+    default_image_path = "dataset/tdun2/00001.png"
+    
+    # Check if the default image path exists
+    if not os.path.exists(default_image_path):
+        print("[ERROR] Default image path does not exist.")
         return
 
     # Load serialized face detector and embedding models
@@ -99,22 +91,30 @@ def main():
     model_path = os.path.sep.join(['face_detection_model', "res10_300x300_ssd_iter_140000.caffemodel"])
     detector = load_face_detector(proto_path, model_path)
 
-    embedder = load_face_embedder('openface_nn4.small2.v1.t7')
+    embedder = load_face_embedder('face_detection_model/openface_nn4.small2.v1.t7')
 
     # Load face recognition model and label encoder
     recognizer, le = load_recognizer_and_label_encoder('output/recognizer.pickle', 'output/le.pickle')
 
     # Load the input image, resize it, and detect faces
-    image = cv2.imread(args["image"])
+    image = cv2.imread(default_image_path)
     image = imutils.resize(image, width=600)
     faces = detect_faces(image, detector)
 
     # Recognize and annotate faces in the image
     output_image = recognize_faces(image, faces, embedder, recognizer, le)
 
-    # Show the output image
+    # Show the output image with non-blocking behavior
     cv2.imshow("Image", output_image)
-    cv2.waitKey(0)
+    cv2.waitKey(1)  # Use a short delay to keep the window responsive
+
+    # Keep the window open until 'q' is pressed
+    while True:
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    # Destroy all OpenCV windows
+    cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main()
