@@ -9,7 +9,7 @@ def create_user_dataset(username, num_images=20):
         os.makedirs(dataset_path)
 
     # Start video capture (webcam)
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
 
     # Set properties to improve image quality
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)

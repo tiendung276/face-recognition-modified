@@ -3,7 +3,12 @@ import imutils
 import pickle
 import cv2
 import os
+import tkinter as tk
+from tkinter import messagebox
+import pandas as pd
+import datetime
 
+# Load models and utilities
 def load_face_detector(proto_path, model_path):
     """Load the face detector model."""
     print("Loading Face Detector...")
@@ -22,6 +27,7 @@ def load_recognizer_and_label_encoder(recognizer_path, le_path):
         le = pickle.load(f)
     return recognizer, le
 
+# Face detection and recognition
 def detect_faces(image, detector, min_confidence=0.5):
     """Detect faces in an image."""
     (h, w) = image.shape[:2]
@@ -50,6 +56,7 @@ def detect_faces(image, detector, min_confidence=0.5):
 
 def recognize_faces(image, faces, embedder, recognizer, le):
     """Recognize faces in the image and draw the results."""
+    recognized = False
     for (face, (startX, startY, endX, endY)) in faces:
         (fH, fW) = face.shape[:2]
 
@@ -75,17 +82,33 @@ def recognize_faces(image, faces, embedder, recognizer, le):
         cv2.rectangle(image, (startX, startY), (endX, endY), (0, 0, 255), 2)
         cv2.putText(image, text, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
 
+        # Record attendance
+        record_attendance(name)
+        recognized = True
+
+    if not recognized:
+        record_attendance("unknown user")
+
     return image
 
-def main():
-    # Set a default image path or allow user input for flexibility
-    default_image_path = "dataset/tdun2/00001.png"
-    
-    # Check if the default image path exists
-    if not os.path.exists(default_image_path):
-        print("[ERROR] Default image path does not exist.")
-        return
+# Attendance recording
+def record_attendance(name):
+    """Record attendance in a CSV file."""
+    if not os.path.exists('Attendance'):
+        os.makedirs('Attendance')
+    attendance_file = 'Attendance/attendance.csv'
+    now = datetime.datetime.now()
+    date_str = now.strftime('%Y-%m-%d %H:%M:%S')
 
+    # Append attendance record
+    df = pd.DataFrame([[name, date_str]], columns=['Name', 'AttendanceDate'])
+    if os.path.exists(attendance_file):
+        df.to_csv(attendance_file, mode='a', header=False, index=False)
+    else:
+        df.to_csv(attendance_file, mode='w', header=True, index=False)
+
+# Tkinter GUI
+def start_recognition():
     # Load serialized face detector and embedding models
     proto_path = os.path.sep.join(['face_detection_model', "deploy.prototxt"])
     model_path = os.path.sep.join(['face_detection_model', "res10_300x300_ssd_iter_140000.caffemodel"])
@@ -96,25 +119,58 @@ def main():
     # Load face recognition model and label encoder
     recognizer, le = load_recognizer_and_label_encoder('output/recognizer.pickle', 'output/le.pickle')
 
-    # Load the input image, resize it, and detect faces
-    image = cv2.imread(default_image_path)
-    image = imutils.resize(image, width=600)
-    faces = detect_faces(image, detector)
+    # Start video capture (webcam)
+    cap = cv2.VideoCapture(0)
+    
+    if not cap.isOpened():
+        messagebox.showerror("Error", "Could not open webcam.")
+        return
 
-    # Recognize and annotate faces in the image
-    output_image = recognize_faces(image, faces, embedder, recognizer, le)
-
-    # Show the output image with non-blocking behavior
-    cv2.imshow("Image", output_image)
-    cv2.waitKey(1)  # Use a short delay to keep the window responsive
-
-    # Keep the window open until 'q' is pressed
+    start_time = datetime.datetime.now()
     while True:
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        # Capture frame-by-frame
+        ret, frame = cap.read()
+        if not ret:
+            messagebox.showerror("Error", "Failed to capture frame from webcam.")
             break
 
-    # Destroy all OpenCV windows
+        # Resize frame for faster processing
+        frame = imutils.resize(frame, width=600)
+        
+        # Detect faces in the frame
+        faces = detect_faces(frame, detector)
+        
+        # Recognize faces in the frame
+        output_frame = recognize_faces(frame, faces, embedder, recognizer, le)
+        
+        # Display the resulting frame
+        cv2.imshow('Real-Time Face Recognition (Press "q" to quit)', output_frame)
+
+        # Stop if the window is closed or 'q' is pressed or after a few seconds
+        if cv2.getWindowProperty('Real-Time Face Recognition (Press "q" to quit)', cv2.WND_PROP_VISIBLE) < 1:
+            break
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+        if (datetime.datetime.now() - start_time).seconds > 5:  # Capture for a few seconds
+            break
+
+    # Release the webcam and close windows
+    cap.release()
     cv2.destroyAllWindows()
+
+# Create main tkinter window
+def main():
+    window = tk.Tk()
+    window.title("Face Recognition Attendance System")
+    window.geometry("400x200")
+
+    lbl = tk.Label(window, text="Face Recognition Attendance System", font=("Arial", 16))
+    lbl.pack(pady=20)
+
+    start_btn = tk.Button(window, text="Start Recognition", command=start_recognition, font=("Arial", 14))
+    start_btn.pack(pady=20)
+
+    window.mainloop()
 
 if __name__ == "__main__":
     main()
