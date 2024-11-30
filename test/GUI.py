@@ -14,7 +14,6 @@ import subprocess
 
 
 # project module
-import show_attendance as show_attendance
 import automaticAttendance as automaticAttendance
 
 # engine = pyttsx3.init()
@@ -95,19 +94,7 @@ a = tk.Label(
 )
 a.pack()
 
-ri = Image.open("UI_icons/register.png")
-r = ImageTk.PhotoImage(ri)
-label1 = Label(window, image=r)
-label1.image = r
-label1.place(x=100, y=270)
 
-ai = Image.open("UI_icons/attendance.png")
-ai = ai.resize((225, 225), Image.LANCZOS)
-
-a = ImageTk.PhotoImage(ai)
-label2 = Label(window, image=a)
-label2.image = a
-label2.place(x=980, y=270)
 
 vi = Image.open("UI_icons/verifyy.png")
 v = ImageTk.PhotoImage(vi)
@@ -328,8 +315,7 @@ r = tk.Button(
 r.place(x=550, y=520)
 
 def view_attendance():
-    show_attendance.view_attendance()
-
+    return 1
 r = tk.Button(
     window,
     text="View Attendance",

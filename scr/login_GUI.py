@@ -4,6 +4,8 @@ from tkinter import ttk
 from tkinter import messagebox
 from database.connection import get_connection, close_connection
 from admin_GUI import open_admin_gui
+from employee_GUI import open_employee_gui
+
 def authenticate_user(username, password):
     try:
         conn = get_connection()
@@ -17,10 +19,11 @@ def authenticate_user(username, password):
                 if role == 'admin':
                     # messagebox.showinfo("Login Success", "Welcome Admin!")
                     root.destroy()
-                    open_admin_gui()  # Hàm mở giao diện Admin
+                    open_admin_gui() 
                 elif role == 'employee':
-                    messagebox.showinfo("Login Success", "Welcome Employee!")
-                    # open_employee_gui()  # Hàm mở giao diện Employee
+                    #messagebox.showinfo("Login Success", "Welcome Employee!")
+                    root.destroy()
+                    open_employee_gui(username) 
             else:
                 messagebox.showerror("Login Failed", "Invalid username or password.")
     except pyodbc.Error as e:

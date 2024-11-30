@@ -7,13 +7,10 @@ from database.connection import get_connection, close_connection
 class AdminGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Employee Management System - Admin Panel")
+        self.root.title("Employee Management System - Admin")
         self.root.geometry("1200x600")
         self.root.config(bg="#9694FF")
-
         self.create_widgets()
-        
-
                 
     def create_widgets(self):
         # Create main frames

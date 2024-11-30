@@ -2,21 +2,17 @@ import cv2
 import os
 import time
 
-def create_user_dataset(username, num_images=20):
-    # Create directory for the user if it doesn't exist
+def create_user_dataset(username, num_images=10):
     dataset_path = os.path.join("dataset", username)
     if not os.path.exists(dataset_path):
         os.makedirs(dataset_path)
 
-    # Start video capture (webcam)
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
 
-    # Set properties to improve image quality
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
     cap.set(cv2.CAP_PROP_FPS, 30)
 
-    # Initialize counter for the number of images captured
     count = 0
 
     print(f"[INFO] Starting to capture images for user: {username}")
@@ -32,7 +28,6 @@ def create_user_dataset(username, num_images=20):
 
         # Display the resulting frame
         cv2.imshow('Capture Images (Press "q" to quit)', frame)
-
         # Save the current frame as an image file
         image_path = os.path.join(dataset_path, f"{str(count).zfill(5)}.png")
         cv2.imwrite(image_path, frame)
@@ -49,10 +44,4 @@ def create_user_dataset(username, num_images=20):
     cv2.destroyAllWindows()
     print(f"[INFO] Completed capturing {count} images for user: {username}")
 
-if __name__ == "__main__":
-    # Get username input
-    username = input("Enter your username: ")
-    if username:
-        create_user_dataset(username)
-    else:
-        print("[ERROR] Username cannot be empty.")
+create_user_dataset("dung")

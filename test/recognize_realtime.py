@@ -82,42 +82,18 @@ def recognize_faces(image, faces, embedder, recognizer, le):
         cv2.rectangle(image, (startX, startY), (endX, endY), (0, 0, 255), 2)
         cv2.putText(image, text, (startX, y), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
 
-        # Record attendance
-        record_attendance(name)
-        recognized = True
-
-    if not recognized:
-        record_attendance("unknown user")
-
     return image
 
-# Attendance recording
-def record_attendance(name):
-    """Record attendance in a CSV file."""
-    if not os.path.exists('Attendance'):
-        os.makedirs('Attendance')
-    attendance_file = 'Attendance/attendance.csv'
-    now = datetime.datetime.now()
-    date_str = now.strftime('%Y-%m-%d %H:%M:%S')
-
-    # Append attendance record
-    df = pd.DataFrame([[name, date_str]], columns=['Name', 'AttendanceDate'])
-    if os.path.exists(attendance_file):
-        df.to_csv(attendance_file, mode='a', header=False, index=False)
-    else:
-        df.to_csv(attendance_file, mode='w', header=True, index=False)
 
 # Tkinter GUI
 def start_recognition():
     # Load serialized face detector and embedding models
-    proto_path = os.path.sep.join(['face_detection_model', "deploy.prototxt"])
-    model_path = os.path.sep.join(['face_detection_model', "res10_300x300_ssd_iter_140000.caffemodel"])
+    proto_path = "C:\\Users\\tdun\\Documents\\QuanLyNhanSu\\face-recognition-using-opencv\\model\\face_detection_model\\deploy.prototxt"
+    model_path = "C:\\Users\\tdun\\Documents\\QuanLyNhanSu\\face-recognition-using-opencv\\model\\face_detection_model\\res10_300x300_ssd_iter_140000.caffemodel"
     detector = load_face_detector(proto_path, model_path)
 
-    embedder = load_face_embedder('face_detection_model/openface_nn4.small2.v1.t7')
-
-    # Load face recognition model and label encoder
-    recognizer, le = load_recognizer_and_label_encoder('output/recognizer.pickle', 'output/le.pickle')
+    embedder = load_face_embedder('C:\\Users\\tdun\\Documents\\QuanLyNhanSu\\face-recognition-using-opencv\\model\\face_detection_model\\openface_nn4.small2.v1.t7')
+    recognizer, le = load_recognizer_and_label_encoder('C:\\Users\\tdun\\Documents\\QuanLyNhanSu\\face-recognition-using-opencv\\model\\embeddings.pickle', 'C:\\Users\\tdun\\Documents\\QuanLyNhanSu\\face-recognition-using-opencv\\model\\le.pickle')
 
     # Start video capture (webcam)
     cap = cv2.VideoCapture(0)

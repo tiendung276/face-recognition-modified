@@ -9,18 +9,21 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.svm import SVC
 
 # create output directory if it doesn't exist
-if not os.path.exists("output"):
-    os.makedirs("output")
+if not os.path.exists("model"):
+    os.makedirs("model")
 
 # load serialized face detector
 print("Loading Face Detector...")
-protoPath = "face_detection_model/deploy.prototxt"
-modelPath = "face_detection_model/res10_300x300_ssd_iter_140000.caffemodel"
-detector = cv2.dnn.readNetFromCaffe(protoPath, modelPath)
+proto_path = "C:\\Users\\tdun\\Documents\\QuanLyNhanSu\\face-recognition-using-opencv\\model\\face_detection_model\\deploy.prototxt"
+model_path = "C:\\Users\\tdun\\Documents\\QuanLyNhanSu\\face-recognition-using-opencv\\model\\face_detection_model\\res10_300x300_ssd_iter_140000.caffemodel"
+embedder_path = "C:\\Users\\tdun\\Documents\\QuanLyNhanSu\\face-recognition-using-opencv\\model\\face_detection_model\\openface_nn4.small2.v1.t7"
+recognizer_path = "C:\\Users\\tdun\\Documents\\QuanLyNhanSu\\face-recognition-using-opencv\\model\\embeddings.pickle"
+le_path = "C:\\Users\\tdun\\Documents\\QuanLyNhanSu\\face-recognition-using-opencv\\model\\le.pickle"
+detector = cv2.dnn.readNetFromCaffe(proto_path, model_path)
 
 # load serialized face embedding model
 print("Loading Face Recognizer...")
-embedder = cv2.dnn.readNetFromTorch("face_detection_model/openface_nn4.small2.v1.t7")
+embedder = cv2.dnn.readNetFromTorch(embedder_path)
 
 # grab the paths to the input images in our dataset
 print("Quantifying Faces...")
@@ -94,11 +97,11 @@ for (i, imagePath) in enumerate(imagePaths):
 # dump the facial embeddings + names to disk
 print("[INFO] serializing {} encodings...".format(total))
 data = {"embeddings": knownEmbeddings, "names": knownNames}
-with open("output/embeddings.pickle", "wb") as f:
+with open("model/embeddings.pickle", "wb") as f:
     pickle.dump(data, f)
 
 # load the face embeddings
-embeddings_path = "output/embeddings.pickle"
+embeddings_path = "model/embeddings.pickle"
 print(f"[INFO] loading face embeddings from {embeddings_path}...")
 with open(embeddings_path, "rb") as f:
     data = pickle.load(f)
@@ -113,13 +116,13 @@ recognizer = SVC(C=1.0, kernel="linear", probability=True)
 recognizer.fit(data["embeddings"], labels)
 
 # write the actual face recognition model to disk
-recognizer_path = "output/recognizer.pickle"
+recognizer_path = "model/recognizer.pickle"
 print(f"[INFO] saving recognizer model to {recognizer_path}...")
 with open(recognizer_path, "wb") as f:
     pickle.dump(recognizer, f)
 
 # write the label encoder to disk
-le_path = "output/le.pickle"
+le_path = "model/le.pickle"
 print(f"[INFO] saving label encoder to {le_path}...")
 with open(le_path, "wb") as f:
     pickle.dump(le, f)
